@@ -56,8 +56,57 @@ port: 8082 >>> 当前num的值为：273
 死锁的问题。
 
 2、redisson 的方式
+```java
+RLock lock = redissonClient.getLock(REDISSON_LOCK_KEY);
+boolean tryLock = lock.tryLock();
+if (!tryLock) {
+    // 锁不可用
+    continue;
+}
+try {
+    int num = (int) redisComponent.get(CACHE_NUM_KEY);
+    System.out.println("port: " + port + " >>> 当前num的值为：" + num);
+    if (num <= 0) {
+        System.out.println("库存不足了！");
+        break;
+    }
+    num -= 1;
+    redisComponent.set(CACHE_NUM_KEY, num);
+    // 持有锁保持20秒，看门狗守护线程每10秒自动续期
+    TimeUnit.SECONDS.sleep(20);
+} catch (InterruptedException e) {
+    throw new RuntimeException(e);
+} finally {
+    // 释放锁
+    lock.unlock();
+}
+```
+使用 redisson 的方式也能达到分布式锁的效果， 它默认设置持有锁的时间为30s
+看门狗守护线程每隔10秒查看key是否存在，如果存在重置key的ttl
 
+如果服务或者服务器宕机了，锁会在30秒内释放
+
+问题：如果看门狗守护线程和redis之间出现了网络问题，然后业务的执行还未结束
+而锁已经到期了，则会出现问题，其他服务节点就会获取到锁。
+
+如果锁的持有时间太长，会导致服务意外宕机后，锁需要很长时间才能释放。
 
 ## 通过信号量实现秒杀
 
-## redLock的概念
+# 分布式锁和同步器
+
+## 可重入锁（Reentrant Lock）
+
+## 公平锁（Fair Lock）
+
+## 联锁（Multi Lock）
+
+## 红锁（Red Lock）
+
+## 读写锁（Read Write Lock）
+
+## 信号量（Semaphore）
+
+## 可过期性信号量（Permit Expirable Semaphore）
+
+## 闭锁（CountDownLatch）
