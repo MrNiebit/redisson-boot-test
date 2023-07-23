@@ -17,12 +17,12 @@ try {
     }
     int num = (int) redisComponent.get(CACHE_NUM_KEY);
     System.out.println("port: " + port + " >>> 当前num的值为：" + num);
-    num -= 1;
-    redisComponent.set(CACHE_NUM_KEY, num);
     if (num <= 0) {
         System.out.println("库存不足了！");
         break;
     }
+    num -= 1;
+    redisComponent.set(CACHE_NUM_KEY, num);
 } finally {
     String th = (String) redisComponent.get(NUM_LOCK_KEY);
     // 匹配的线程，才能释放锁
