@@ -1,5 +1,6 @@
 package cn.lacknb.redissonboottest.controller;
 
+import cn.lacknb.redissonboottest.annotation.DistributeKey;
 import cn.lacknb.redissonboottest.component.RedisComponent;
 import org.redisson.api.RBucket;
 import org.redisson.api.RLock;
@@ -123,5 +124,19 @@ public class TestController {
             }
         }
         return "over";
+    }
+
+    @RequestMapping("/buy3")
+    @DistributeKey(REDISSON_LOCK_KEY)
+    public String buy3() throws InterruptedException {
+        int num = (int) redisComponent.get(CACHE_NUM_KEY);
+        System.out.println("port: " + port + " >>> 当前num的值为：" + num);
+        if (num <= 0) {
+            System.out.println("库存不足了！");
+            return "ok";
+        }
+        num -= 1;
+        redisComponent.set(CACHE_NUM_KEY, num);
+        return "ok";
     }
 }
