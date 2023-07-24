@@ -137,6 +137,7 @@ public class TestController {
         }
         num -= 1;
         redisComponent.set(CACHE_NUM_KEY, num);
+        TimeUnit.MILLISECONDS.sleep(300);
         return "ok";
     }
 }
