@@ -29,7 +29,7 @@ public class DistributedLockAspect {
     @Autowired
     private RedissonClient redissonClient;
 
-    @Value("${server.port}")
+    @Value("${server.port:8080}")
     private String serverPort;
 
     private static final String COMMON_PREFIX = "redisson-lock";
@@ -37,7 +37,7 @@ public class DistributedLockAspect {
     @Around("@annotation(distributeKey)")
     public Object lock(ProceedingJoinPoint point, DistributeKey distributeKey) throws Throwable {
         String value = distributeKey.value();
-        boolean single = distributeKey.s();
+        boolean single = distributeKey.single();
         if (!single) {
             // 集群环境下，多服务并发执行
             // 获取当前机器IP和端口
