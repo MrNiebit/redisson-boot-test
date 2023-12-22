@@ -53,7 +53,9 @@ public class DistributedLockAspect {
         try {
             return point.proceed();
         } finally {
-            lock.unlock();
+            if (lock.isLocked()) {
+                lock.unlock();
+            }
         }
     }
 

@@ -110,3 +110,27 @@ try {
 ## 可过期性信号量（Permit Expirable Semaphore）
 
 ## 闭锁（CountDownLatch）
+
+# 源码摘录
+
+## lua相关脚本
+
+```lua
+if (redis.call("exists", KEYS[1]) == 0) or (redis.call("hexists", KEYS[1], ARGV[2]) == 1) then
+  redis.call("hincrby", KEYS[1], ARGV[2], 1)
+  redis.call("pexpire", KEYS[1], ARGV[1])
+  return nil
+end
+return redis.call("pttl", KEYS[1])
+```
+1、如果key不存在，或者对应线程id作为key存在，然后将 线程id作为key对应的value加1，并且设置过期时间
+2、如果key存在，则返回剩余时间
+
+```lua
+if redis.call("hexists", KEYS[1], ARGV[2]) == 1 then
+  redis.call("pexpire", KEYS[1], ARGV[1])
+  return 1
+end
+return 0
+```
+如果某key对应hash存在指定线程id，则重置该key过期时间
